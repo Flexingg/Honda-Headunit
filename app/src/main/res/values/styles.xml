@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Glass" parent="@android:style/Theme.Holo.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:windowAnimationStyle">@style/GlassAnim</item>
+        <item name="android:textColor">#FFFFFFFF</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+    <style name="GlassAnim" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/fluid_in</item>
+        <item name="android:activityOpenExitAnimation">@anim/fluid_hold</item>
+        <item name="android:activityCloseEnterAnimation">@anim/fluid_hold</item>
+        <item name="android:activityCloseExitAnimation">@anim/fluid_out</item>
+    </style>
+</resources>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <application
+        android:label="Civic"
+        android:icon="@drawable/ic_launcher"
+        android:hardwareAccelerated="true"
+        android:largeHeap="false"
+        android:theme="@style/Glass">
+
+        <activity
+            android:name=".HomeActivity"
+            android:launchMode="singleTask"
+            android:screenOrientation="sensorLandscape"
+            android:stateNotNeeded="true"
+            android:clearTaskOnLaunch="true"
+            android:configChanges="orientation|screenSize|keyboardHidden"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name=".AppsActivity" android:screenOrientation="sensorLandscape" />
+        <activity android:name=".StatsActivity" android:screenOrientation="sensorLandscape" />
+        <activity android:name=".SettingsActivity" android:screenOrientation="sensorLandscape" />
+
+        <service android:name=".ObdService" />
+    </application>
+</manifest>
