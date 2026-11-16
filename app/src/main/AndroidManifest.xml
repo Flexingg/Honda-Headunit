@@ -3,6 +3,7 @@
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
     <application
         android:label="Civic"
@@ -30,6 +31,11 @@
         <activity android:name=".AppsActivity" android:screenOrientation="sensorLandscape" />
         <activity android:name=".StatsActivity" android:screenOrientation="sensorLandscape" />
         <activity android:name=".SettingsActivity" android:screenOrientation="sensorLandscape" />
+
+        <!-- Diagnostic recon, see docs/HACKING.md. Launched via
+             `adb shell am start -n com.civic.launcher/.ProbeActivity`,
+             not reachable from the normal launcher UI. -->
+        <activity android:name=".ProbeActivity" android:screenOrientation="sensorLandscape" android:exported="true" />
 
         <service android:name=".ObdService" />
     </application>
