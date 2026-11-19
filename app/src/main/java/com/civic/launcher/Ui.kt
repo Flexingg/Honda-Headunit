@@ -8,9 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import java.util.Calendar
 
 /** Tiny view DSL so we don't need AndroidX or layout inflation. */
 fun Context.dp(v: Float) = (v * resources.displayMetrics.density + 0.5f).toInt()
@@ -51,19 +53,68 @@ fun Context.glass(child: View, padDp: Int = 16, onClick: (() -> Unit)? = null) =
 }
 
 /** Round glass icon button (text glyph = no image assets). */
-fun Context.pill(glyph: String, sizeDp: Int = 52, onClick: () -> Unit) = GlassView(this, sizeDp / 2f).apply {
-    pressable = true; isClickable = true; setOnClickListener { onClick() }
-    addView(text(glyph, 20f).apply { gravity = Gravity.CENTER },
-        FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
-    layoutParams = LinearLayout.LayoutParams(dp(sizeDp), dp(sizeDp)).apply { setMargins(dp(6), 0, dp(6), 0) }
+fun Context.pill(glyph: String, sizeDp: Int = 52, textSizeSp: Float = 20f, onClick: () -> Unit) =
+    GlassView(this, sizeDp / 2f).apply {
+        pressable = true; isClickable = true; setOnClickListener { onClick() }
+        addView(text(glyph, textSizeSp).apply { gravity = Gravity.CENTER },
+            FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+        layoutParams = LinearLayout.LayoutParams(dp(sizeDp), dp(sizeDp)).apply { setMargins(dp(6), 0, dp(6), 0) }
+    }
+
+/** Day/Night driving dim mode: adds a dark scrim and adjusts per-window brightness. */
+object NightMode {
+    const val AUTO = 0
+    const val DAY = 1
+    const val NIGHT = 2
+
+    fun isNight(c: Context): Boolean = when (Prefs.nightMode(c)) {
+        DAY -> false
+        NIGHT -> true
+        else -> {
+            val cal = Calendar.getInstance()
+            val mins = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
+            mins >= 19 * 60 || mins < 6 * 60 + 30
+        }
+    }
+
+    fun label(mode: Int): String = when (mode) {
+        DAY -> "Day"
+        NIGHT -> "Night"
+        else -> "Auto (7pm–6:30am)"
+    }
+
+    fun glyph(c: Context): String = when (Prefs.nightMode(c)) {
+        DAY -> "☀"
+        NIGHT -> "☾"
+        else -> if (isNight(c)) "☾" else "☀"
+    }
+
+    fun apply(activity: Activity, scrim: View?) {
+        val night = isNight(activity)
+        scrim?.visibility = if (night) View.VISIBLE else View.GONE
+        val lp = activity.window.attributes
+        val target = if (night) Prefs.nightBrightness(activity)
+            else WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+        if (lp.screenBrightness != target) {
+            lp.screenBrightness = target
+            activity.window.attributes = lp
+        }
+    }
 }
 
-/** Wraps a screen: backdrop + content, immersive. */
-fun Activity.glassScreen(content: View) {
+/** Wraps a screen: backdrop + content + night scrim, immersive. Returns the night scrim view. */
+fun Activity.glassScreen(content: View): View {
     Backdrop.ensure(this)
     val root = FrameLayout(this)
     root.addView(BackdropView(this), FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
     root.addView(content, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
+    val scrim = View(this).apply {
+        setBackgroundColor(0x66000000)
+        visibility = View.GONE
+    }
+    root.addView(scrim, FrameLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT))
     setContentView(root)
     window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LOW_PROFILE
+    NightMode.apply(this, scrim)
+    return scrim
 }

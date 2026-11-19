@@ -31,7 +31,7 @@ object Backdrop {
         val dm = ctx.resources.displayMetrics
         val w = maxOf(dm.widthPixels, dm.heightPixels)
         val h = minOf(dm.widthPixels, dm.heightPixels)
-        if (sharp != null && w == screenW && h == screenH) return
+        if (sharp != null && blurred != null && w == screenW && h == screenH) return
         screenW = w; screenH = h
         val bw = w / SCALE; val bh = h / SCALE
         val bmp = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888)
@@ -40,7 +40,7 @@ object Backdrop {
         blurred = blur(ctx, blur(ctx, bmp, 25f), 25f)
     }
 
-    fun invalidate() { sharp = null }
+    fun invalidate() { sharp = null; blurred = null }
 
     /** ColorOS-style soft colour blobs on a deep base. */
     private fun paintAurora(c: Canvas, w: Float, h: Float, theme: Int) {
