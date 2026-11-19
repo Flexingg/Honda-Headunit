@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import java.io.InputStream
 import java.io.OutputStream
 import java.util.UUID
@@ -44,6 +45,8 @@ class ObdService : Service() {
     private var socket: BluetoothSocket? = null
 
     override fun onBind(i: Intent?) = null
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int) = START_STICKY
 
     override fun onCreate() {
         Thread({ loop() }, "obd").apply { priority = Thread.MIN_PRIORITY; start() }
@@ -107,7 +110,13 @@ class ObdService : Service() {
     private fun cmd(i: InputStream, o: OutputStream, c: String): String {
         o.write((c + "\r").toByteArray()); o.flush()
         val sb = StringBuilder()
-        while (true) {
+        val deadline = SystemClock.uptimeMillis() + CMD_TIMEOUT_MS
+        while (running) {
+            if (i.available() == 0) {
+                if (SystemClock.uptimeMillis() > deadline) throw Exception("timeout")
+                Thread.sleep(15)
+                continue
+            }
             val b = i.read(); if (b < 0) throw Exception("socket closed")
             if (b.toChar() == '>') break
             sb.append(b.toChar())
@@ -116,6 +125,7 @@ class ObdService : Service() {
     }
 
     companion object {
+        private const val CMD_TIMEOUT_MS = 3000L
         private val SPP = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
         fun restart(c: Context) {
             c.stopService(Intent(c, ObdService::class.java))

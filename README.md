@@ -3,16 +3,18 @@
 Glass-style, ColorOS-inspired home screen for the **2016 Honda Civic Display Audio** (Android 4.2.2, API 17, 800×480).
 
 ## Build
-Open this folder in Android Studio (it creates the Gradle wrapper), then **Build → Build APK(s)**,
-or run `gradle wrapper && ./gradlew assembleRelease`. The release APK is R8-shrunk and has no libraries besides the Kotlin stdlib.
+Open this folder in Android Studio, then **Build → Build APK(s)**, or run `./gradlew assembleRelease`.
+Pushes to `main` also build `app-debug.apk` and `app-release.apk` via GitHub Actions (downloadable from the **Actions** tab).
+The release APK is R8-shrunk and has no libraries besides the Kotlin stdlib.
 
 ## Install
-Sideload the APK with your Honda hack, press Home, pick **Civic** and choose "Always".
+Sideload the APK with your Honda hack or `adb install -r app-release.apk`, press Home, pick **Civic** and choose "Always".
 
 ## What it does
-- Home: clock/date, now playing with prev/play/next, Maps card with Home/Work navigation, live car tile, phone, app drawer
+- Home: clock/date with quick controls (volume −/+, Day/Night dimming toggle, Settings), now playing with prev/play/next, Maps card with Home/Work navigation, live car tile, phone, app drawer, and an optional pinned favorites dock
+- Apps drawer: long-press any app to pin up to 4 favorites to Home or hide unused factory apps
 - Car stats: speed, RPM, coolant, intake, throttle, load, fuel, battery voltage from a Bluetooth ELM327 adapter
-- Settings: OBD adapter, mph/km/h, 3 themes, saved addresses
+- Settings: OBD adapter, mph/km/h, 3 themes, Day/Night/Auto dimming & night brightness, preferred Music/Navigation apps, saved addresses, and Diagnostic Probe shortcut
 
 ## Limits on this head unit
 - **HVAC**: the climate strip talks to the climate module over the car's B-CAN bus. The head unit gives apps no way to send commands, so the launcher can't control HVAC.
